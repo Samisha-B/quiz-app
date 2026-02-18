@@ -1,25 +1,28 @@
-/* src/app/globals.css */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+@layer base {
+  body {
+    background: linear-gradient(135deg, #eef2ff 0%, #ffffff 50%, #f3e8ff 100%);
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
+@layer components {
+  .glass {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+  }
+  
+  .glass-card {
+    @apply glass rounded-3xl p-8 md:p-10;
+  }
+  
+  .option-hover {
+    @apply transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-lg active:scale-[0.98];
+  }
 }
 
 @layer utilities {
@@ -44,4 +47,20 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Shimmer animation for Tailwind v4 */
+@keyframes shimmer {
+  0% { 
+    background-position: -200% 0; 
+  }
+  100% { 
+    background-position: 200% 0; 
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
