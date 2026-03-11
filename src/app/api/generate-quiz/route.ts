@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateQuiz } from "@/lib/quizGraph";
+import { prisma } from "@/lib/db";
+import { getCurrentUserId } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,18 +12,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
 
-    // FIXED SYNTAX: Proper type casting
-    const result = await generateQuiz({ 
-      topic, 
-      numQuestions, 
-      difficulty: difficulty as "easy" | "medium" | "hard" 
-    });
+    const result = await generateQuiz({ topic, numQuestions, difficulty });
 
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 500 });
+    if (result.error || !result.quiz) {
+      return NextResponse.json({ error: result.error || "Failed to generate quiz" }, { status: 500 });
     }
 
-    return NextResponse.json({ quiz: result.quiz });
+    const userId = await getCurrentUserId();
+
+    const createdQuiz = await prisma.quiz.create({
+      data: {
+        title: result.quiz.title,
+        description: result.quiz.description,
+        topic,
+        difficulty,
+        userId: userId || undefined,
+        questions: {
+          create: result.quiz.questions.map((q) => ({
+            text: q.question,
+            options: JSON.stringify(q.options),
+            correctIndex: q.correctAnswer,
+            explanation: q.explanation,
+          })),
+        },
+      },
+    });
+
+    return NextResponse.json({ quiz: result.quiz, quizId: createdQuiz.id });
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

@@ -1,4 +1,3 @@
-// src/lib/types.ts - NO CHANGES NEEDED, JUST VERIFY
 export interface QuizQuestion {
   question: string;
   options: string[];
@@ -16,12 +15,7 @@ export interface QuizState {
   topic: string;
   numQuestions: number;
   difficulty: 'easy' | 'medium' | 'hard';
-  quiz: Quiz | null;
-  error: string | null;
-}
-
-export interface QuizGenerationRequest {
-  topic: string;
-  numQuestions: number;
-  difficulty: 'easy' | 'medium' | 'hard';
+  outline?: string[];
+  quiz?: Quiz;
+  error?: string | null;
 }
