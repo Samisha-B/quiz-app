@@ -1,5 +1,3 @@
-// src/components/QuizInterface.tsx
-
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -21,7 +19,7 @@ interface ConfettiParticle {
 
 export default function QuizInterface() {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [quizId, setQuizId] = useState<string | null>(null); // NEW
+  const [quizId, setQuizId] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -56,7 +54,7 @@ export default function QuizInterface() {
       if (!response.ok) throw new Error(data.error || "Failed to generate quiz");
 
       setQuiz(data.quiz);
-      setQuizId(data.quizId || null); // NEW
+      setQuizId(data.quizId || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -75,50 +73,8 @@ export default function QuizInterface() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ score: finalScore, totalQuestions }),
       });
-      // optional: handle response
     } catch (e) {
       console.error("Failed to submit results", e);
-    }
-  };
-
-  const handleAnswer = (correct: boolean) => {
-    if (correct) {
-      setScore((prev) => prev + 1);
-    }
-
-    setTimeout(() => {
-      if (!quiz) return;
-
-      if (currentQuestion < quiz.questions.length - 1) {
-        setCurrentQuestion((prev) => prev + 1);
-      } else {
-        // quiz finished
-        const finalScore = score + (correct ? 1 : 0);
-        setShowResults(true);
-
-        if (quizId) {
-          submitResults(quizId, finalScore, quiz.questions.length);
-        }
-
-        if (finalScore / quiz.questions.length >= 0.8) {
-          setShowConfetti(true);
-          triggerConfetti();
-        }
-      }
-    }, 1500);
-  };
-
-  const handleRestart = () => {
-    setQuiz(null);
-    setQuizId(null);
-    setCurrentQuestion(0);
-    setScore(0);
-    setShowResults(false);
-    setError(null);
-    setShowConfetti(false);
-
-    if (animationIdRef.current) {
-      cancelAnimationFrame(animationIdRef.current);
     }
   };
 
@@ -129,7 +85,6 @@ export default function QuizInterface() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set canvas size safely (guard window for SSR)
     const width = typeof window !== "undefined" ? window.innerWidth : 800;
     const height = typeof window !== "undefined" ? window.innerHeight : 600;
     canvas.width = width;
@@ -176,6 +131,50 @@ export default function QuizInterface() {
 
     animationIdRef.current = requestAnimationFrame(animate);
   }, []);
+
+  const handleAnswer = useCallback(
+    (correct: boolean) => {
+      if (correct) setScore((prev) => prev + 1);
+
+      setTimeout(() => {
+        if (!quiz) return;
+
+        setCurrentQuestion((prev) => {
+          if (prev < quiz.questions.length - 1) {
+            return prev + 1;
+          } else {
+            // Quiz finished — use functional score update to get latest value
+            setScore((latestScore) => {
+              const finalScore = latestScore + (correct ? 1 : 0);
+              setShowResults(true);
+              if (quizId) submitResults(quizId, finalScore, quiz.questions.length);
+              if (finalScore / quiz.questions.length >= 0.8) {
+                setShowConfetti(true);
+                triggerConfetti();
+              }
+              return latestScore; // don't change score here, already updated above
+            });
+            return prev;
+          }
+        });
+      }, 1500);
+    },
+    [quiz, quizId, triggerConfetti]
+  );
+
+  const handleRestart = () => {
+    setQuiz(null);
+    setQuizId(null);
+    setCurrentQuestion(0);
+    setScore(0);
+    setShowResults(false);
+    setError(null);
+    setShowConfetti(false);
+
+    if (animationIdRef.current) {
+      cancelAnimationFrame(animationIdRef.current);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -240,9 +239,7 @@ export default function QuizInterface() {
                 <div className="flex flex-col items-end gap-2">
                   <ProgressBar
                     progress={progress}
-                    label={`Question ${currentQuestion + 1} of ${
-                      quiz.questions.length
-                    }`}
+                    label={`Question ${currentQuestion + 1} of ${quiz.questions.length}`}
                   />
                   <div className="text-2xl font-bold text-blue-600">
                     Score: {score}
@@ -253,6 +250,7 @@ export default function QuizInterface() {
 
             <div className="glass-card">
               <Question
+                key={currentQuestion}
                 question={quiz.questions[currentQuestion]}
                 questionNumber={currentQuestion + 1}
                 onAnswer={handleAnswer}

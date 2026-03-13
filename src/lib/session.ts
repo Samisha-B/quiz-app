@@ -1,9 +1,9 @@
 // src/lib/session.ts
-
+export const SESSION_COOKIE = 'quiz-userid';
 import { cookies } from "next/headers";
 import { prisma } from "./db";
 
-const SESSION_COOKIE = "quiz_user_id";
+//const SESSION_COOKIE = "quiz_user_id";
 
 export async function getCurrentUserId(): Promise<string | null> {
   try {

@@ -20,7 +20,6 @@ export default function Question({
 
   const handleOptionClick = (index: number) => {
     if (selectedOption !== null) return;
-
     setSelectedOption(index);
     setShowExplanation(true);
     onAnswer(index === question.correctAnswer);
@@ -60,7 +59,7 @@ export default function Question({
               key={index}
               onClick={() => handleOptionClick(index)}
               disabled={selectedOption !== null}
-              className={`${buttonClass} ${showResult ? 'cursor-default' : 'cursor-pointer'}`}
+              className={`${buttonClass} ${showResult ? "cursor-default" : "cursor-pointer"}`}
             >
               <div className="flex items-center justify-between relative z-10">
                 <span className="font-bold text-lg group-hover:text-gray-800">{option}</span>
@@ -77,8 +76,6 @@ export default function Question({
                   </div>
                 )}
               </div>
-              
-              {/* Shimmer overlay for unselected options */}
               {!showResult && (
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000 animate-shimmer" />
               )}

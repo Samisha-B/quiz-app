@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -7,23 +8,23 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   password  String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   quizzes   Quiz[]
   attempts  Attempt[]
 }
 
 model Quiz {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   title       String
   description String
   topic       String
   difficulty  String
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime   @default(now())
   userId      String?
-  user        User?     @relation(fields: [userId], references: [id])
+  user        User?      @relation(fields: [userId], references: [id])
   questions   Question[]
   attempts    Attempt[]
 }
@@ -31,20 +32,20 @@ model Quiz {
 model Question {
   id           String @id @default(cuid())
   quizId       String
-  quiz         Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
   text         String
   options      String
   correctIndex Int
   explanation  String
+  quiz         Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 
 model Attempt {
-  id            String   @id @default(cuid())
-  quizId        String
-  quiz          Quiz     @relation(fields: [quizId], references: [id])
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id])
-  score         Int
+  id             String   @id @default(cuid())
+  quizId         String
+  userId         String?
+  score          Int
   totalQuestions Int
-  createdAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+  quiz           Quiz     @relation(fields: [quizId], references: [id])
+  user           User?    @relation(fields: [userId], references: [id])
 }

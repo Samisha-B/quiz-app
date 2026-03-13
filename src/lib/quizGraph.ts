@@ -3,9 +3,9 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { Quiz } from "./types";
 
 const model = new ChatOpenAI({
-  modelName: "gpt-3.5-turbo",
+  model: "gpt-4o-mini", // updated model
   temperature: 0.7,
-  openAIApiKey: process.env.OPENAI_API_KEY!,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function generateQuiz(input: {
@@ -16,9 +16,12 @@ export async function generateQuiz(input: {
   const { topic, numQuestions, difficulty } = input;
 
   try {
-    const systemPrompt = `You are a quiz generation expert. Generate exactly ${numQuestions} ${difficulty} difficulty questions about "${topic}".
+    const systemPrompt = `You are a quiz generation expert.
 
-Return ONLY valid JSON with no extra text:
+Generate exactly ${numQuestions} ${difficulty} difficulty questions about "${topic}".
+
+Return ONLY valid JSON:
+
 {
   "title": "Quiz Title",
   "description": "Brief description",
@@ -34,13 +37,14 @@ Return ONLY valid JSON with no extra text:
 
     const messages = [
       new SystemMessage(systemPrompt),
-      new HumanMessage(`Generate ${numQuestions} questions now.`),
+      new HumanMessage(`Generate ${numQuestions} questions.`),
     ];
 
     const response = await model.invoke(messages);
     const content = response.content as string;
 
     let jsonStr = content;
+
     const match = content.match(/```json?\s*([\s\S]*?)\s*```/);
     if (match?.[1]) {
       jsonStr = match[1];
@@ -56,6 +60,7 @@ Return ONLY valid JSON with no extra text:
     }
 
     return { quiz, error: null };
+
   } catch (error) {
     console.error(error);
     return { quiz: null, error: "Failed to generate quiz" };
