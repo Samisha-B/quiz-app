@@ -1,3 +1,5 @@
+// src/lib/types.ts
+
 export interface QuizQuestion {
   question: string;
   options: string[];
@@ -11,11 +13,8 @@ export interface Quiz {
   questions: QuizQuestion[];
 }
 
-export interface QuizState {
+export interface QuizInput {
   topic: string;
   numQuestions: number;
-  difficulty: 'easy' | 'medium' | 'hard';
-  outline?: string[];
-  quiz?: Quiz;
-  error?: string | null;
+  difficulty: string;
 }
