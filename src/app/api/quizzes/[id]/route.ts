@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         description: quiz.description,
         topic: quiz.topic,
         difficulty: quiz.difficulty,
-        questions: quiz.questions.map((q) => ({
+        questions: quiz.questions.map((q: any) => ({
           question: q.text,
           options: JSON.parse(q.options),
           correctAnswer: q.correctIndex,
